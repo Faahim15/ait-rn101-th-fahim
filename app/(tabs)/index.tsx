@@ -1,98 +1,153 @@
-import { Image } from 'expo-image';
-import { Platform, StyleSheet } from 'react-native';
+"use client";
 
-import { HelloWave } from '@/components/hello-wave';
-import ParallaxScrollView from '@/components/parallax-scroll-view';
-import { ThemedText } from '@/components/themed-text';
-import { ThemedView } from '@/components/themed-view';
-import { Link } from 'expo-router';
+import { Ionicons } from "@expo/vector-icons";
+import { router } from "expo-router";
+import { useCallback, useEffect, useState } from "react";
+import {
+  ActivityIndicator,
+  FlatList,
+  KeyboardAvoidingView,
+  Platform,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
+} from "react-native";
 
-export default function HomeScreen() {
-  return (
-    <ParallaxScrollView
-      headerBackgroundColor={{ light: '#A1CEDC', dark: '#1D3D47' }}
-      headerImage={
-        <Image
-          source={require('@/assets/images/partial-react-logo.png')}
-          style={styles.reactLogo}
+export default function TaskListScreen() {
+  const {
+    tasks,
+    filter,
+    setFilter,
+    searchQuery,
+    setSearchQuery,
+    loadTasks,
+    loading,
+  } = useTaskStore();
+
+  const [sortBy, setSortBy] = useState<"date" | "priority">("date");
+
+  useEffect(() => {
+    loadTasks();
+  }, []);
+
+  const filteredTasks = tasks.filter((task) => {
+    const matchesFilter =
+      filter === "all" ||
+      (filter === "pending" && !task.completed) ||
+      (filter === "completed" && task.completed);
+
+    const matchesSearch = task.title
+      .toLowerCase()
+      .includes(searchQuery.toLowerCase());
+
+    return matchesFilter && matchesSearch;
+  });
+
+  const sortedTasks = [...filteredTasks].sort((a, b) => {
+    if (sortBy === "priority") {
+      const priorityOrder = { high: 0, medium: 1, low: 2 };
+      return priorityOrder[a.priority] - priorityOrder[b.priority];
+    }
+    return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+  });
+
+  const renderItem = useCallback(
+    ({ item }: any) => <TaskItem task={item} />,
+    []
+  );
+
+  const renderHeader = () => (
+    <View className="mb-6">
+      {/* Search Bar */}
+      <View className="mb-4 flex-row items-center bg-gray-100 rounded-lg px-[5%] mx-[3%]">
+        <Ionicons name="search" size={20} color="#999" />
+        <TextInput
+          placeholder="Search tasks..."
+          placeholderTextColor="#999"
+          value={searchQuery}
+          onChangeText={setSearchQuery}
+          className="flex-1 ml-2 py-3 text-gray-900"
         />
-      }>
-      <ThemedView style={styles.titleContainer}>
-        <ThemedText type="title">Welcome!</ThemedText>
-        <HelloWave />
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 1: Try it</ThemedText>
-        <ThemedText>
-          Edit <ThemedText type="defaultSemiBold">app/(tabs)/index.tsx</ThemedText> to see changes.
-          Press{' '}
-          <ThemedText type="defaultSemiBold">
-            {Platform.select({
-              ios: 'cmd + d',
-              android: 'cmd + m',
-              web: 'F12',
-            })}
-          </ThemedText>{' '}
-          to open developer tools.
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <Link href="/modal">
-          <Link.Trigger>
-            <ThemedText type="subtitle">Step 2: Explore</ThemedText>
-          </Link.Trigger>
-          <Link.Preview />
-          <Link.Menu>
-            <Link.MenuAction title="Action" icon="cube" onPress={() => alert('Action pressed')} />
-            <Link.MenuAction
-              title="Share"
-              icon="square.and.arrow.up"
-              onPress={() => alert('Share pressed')}
-            />
-            <Link.Menu title="More" icon="ellipsis">
-              <Link.MenuAction
-                title="Delete"
-                icon="trash"
-                destructive
-                onPress={() => alert('Delete pressed')}
-              />
-            </Link.Menu>
-          </Link.Menu>
-        </Link>
+      </View>
 
-        <ThemedText>
-          {`Tap the Explore tab to learn more about what's included in this starter app.`}
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 3: Get a fresh start</ThemedText>
-        <ThemedText>
-          {`When you're ready, run `}
-          <ThemedText type="defaultSemiBold">npm run reset-project</ThemedText> to get a fresh{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> directory. This will move the current{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> to{' '}
-          <ThemedText type="defaultSemiBold">app-example</ThemedText>.
-        </ThemedText>
-      </ThemedView>
-    </ParallaxScrollView>
+      {/* Filter & Sort */}
+      <View className="px-[5%] mx-[3%] flex-row justify-between items-center mb-4">
+        <View className="flex-row gap-2">
+          {["all", "pending", "completed"].map((f) => (
+            <TouchableOpacity
+              key={f}
+              onPress={() => setFilter(f as any)}
+              className={`px-4 py-2 rounded-lg ${filter === f ? "bg-blue-600" : "bg-gray-200"}`}
+            >
+              <Text
+                className={`font-medium capitalize ${filter === f ? "text-white" : "text-gray-700"}`}
+              >
+                {f}
+              </Text>
+            </TouchableOpacity>
+          ))}
+        </View>
+
+        <TouchableOpacity
+          onPress={() => setSortBy(sortBy === "date" ? "priority" : "date")}
+          className="bg-gray-200 px-3 py-2 rounded-lg"
+        >
+          <Ionicons
+            name={sortBy === "date" ? "calendar" : "alert-circle"}
+            size={18}
+            color="#374151"
+          />
+        </TouchableOpacity>
+      </View>
+    </View>
+  );
+
+  const renderEmptyState = () => (
+    <View className="flex-1 justify-center items-center py-12 px-[5%] mx-[3%]">
+      <Ionicons name="checkbox-outline" size={48} color="#d1d5db" />
+      <Text className="text-lg font-semibold text-gray-600 mt-4">
+        No tasks found
+      </Text>
+      <Text className="text-gray-500 text-center mt-2">
+        {filter !== "all"
+          ? `No ${filter} tasks`
+          : "Create your first task to get started"}
+      </Text>
+    </View>
+  );
+
+  return (
+    <KeyboardAvoidingView
+      behavior={Platform.OS === "ios" ? "padding" : "height"}
+      className="flex-1 bg-white"
+    >
+      <View className="flex-1">
+        {loading && (
+          <View className="absolute inset-0 justify-center items-center bg-black/10 z-50">
+            <ActivityIndicator size="large" color="#2563eb" />
+          </View>
+        )}
+
+        <FlatList
+          data={sortedTasks}
+          renderItem={renderItem}
+          keyExtractor={(item) => item.id}
+          ListHeaderComponent={renderHeader}
+          ListEmptyComponent={renderEmptyState}
+          contentContainerStyle={{ paddingBottom: 20 }}
+          showsVerticalScrollIndicator={false}
+        />
+
+        {/* FAB */}
+        <TouchableOpacity
+          onPress={() => router.push("/create-task")}
+          className="absolute bottom-6 right-6 bg-blue-600 rounded-full w-16 h-16 justify-center items-center shadow-lg"
+          style={{ elevation: 5 }}
+        >
+          <Ionicons name="add" size={28} color="white" />
+        </TouchableOpacity>
+      </View>
+    </KeyboardAvoidingView>
   );
 }
-
-const styles = StyleSheet.create({
-  titleContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-  },
-  stepContainer: {
-    gap: 8,
-    marginBottom: 8,
-  },
-  reactLogo: {
-    height: 178,
-    width: 290,
-    bottom: 0,
-    left: 0,
-    position: 'absolute',
-  },
-});
