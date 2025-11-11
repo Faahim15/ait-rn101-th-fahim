@@ -7,6 +7,8 @@ interface TaskStore {
   syncQueue: SyncQueue[];
   isLoading: boolean;
   error: string | null;
+  filter: "all" | "pending" | "completed";
+  searchQuery: string;
 
   loadTasks: () => Promise<void>;
   addTask: (
@@ -15,6 +17,8 @@ interface TaskStore {
   updateTask: (id: string, updates: Partial<Task>) => Promise<void>;
   deleteTask: (id: string) => Promise<void>;
   toggleComplete: (id: string) => Promise<void>;
+  setFilter: (filter: "all" | "pending" | "completed") => void;
+  setSearchQuery: (query: string) => void;
   searchTasks: (query: string) => Task[];
   filterTasks: (status?: string, tags?: string[]) => Task[];
   syncTasks: () => Promise<void>;
@@ -26,6 +30,8 @@ export const useTaskStore = create<TaskStore>((set, get) => ({
   syncQueue: [],
   isLoading: false,
   error: null,
+  filter: "all",
+  searchQuery: "",
 
   loadTasks: async () => {
     try {
@@ -52,11 +58,11 @@ export const useTaskStore = create<TaskStore>((set, get) => ({
 
     const { tasks, syncQueue } = get();
     const updated = [...tasks, newTask];
-    const newQueue = [
+    const newQueue: SyncQueue[] = [
       ...syncQueue,
       {
         id: Date.now().toString(),
-        action: "create",
+        action: "create" as const,
         taskId: newTask.id,
         taskData: newTask,
         timestamp: Date.now(),
@@ -82,11 +88,11 @@ export const useTaskStore = create<TaskStore>((set, get) => ({
         : t
     );
 
-    const newQueue = [
+    const newQueue: SyncQueue[] = [
       ...syncQueue,
       {
         id: Date.now().toString(),
-        action: "update",
+        action: "update" as const,
         taskId: id,
         taskData: updates,
         timestamp: Date.now(),
@@ -102,11 +108,11 @@ export const useTaskStore = create<TaskStore>((set, get) => ({
   deleteTask: async (id) => {
     const { tasks, syncQueue } = get();
     const updated = tasks.filter((t) => t.id !== id);
-    const newQueue = [
+    const newQueue: SyncQueue[] = [
       ...syncQueue,
       {
         id: Date.now().toString(),
-        action: "delete",
+        action: "delete" as const,
         taskId: id,
         timestamp: Date.now(),
         retries: 0,
@@ -139,7 +145,15 @@ export const useTaskStore = create<TaskStore>((set, get) => ({
   },
 
   filterTasks: (status, tags) => {
-    let { tasks } = get();
+    let { tasks, filter, searchQuery } = get();
+    const lowerSearchQuery = searchQuery.toLowerCase();
+    tasks = tasks.filter(
+      (t) =>
+        (lowerSearchQuery === "" ||
+          t.title.toLowerCase().includes(lowerSearchQuery) ||
+          t.description?.toLowerCase().includes(lowerSearchQuery)) &&
+        (filter === "all" || t.status === filter)
+    );
     if (status && status !== "all") {
       tasks = tasks.filter((t) => t.status === status);
     }
@@ -176,4 +190,7 @@ export const useTaskStore = create<TaskStore>((set, get) => ({
     set({ syncQueue: [] });
     await AsyncStorage.setItem("syncQueue", JSON.stringify([]));
   },
+
+  setFilter: (filter) => set({ filter }),
+  setSearchQuery: (query) => set({ searchQuery: query }),
 }));

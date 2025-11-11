@@ -13,7 +13,7 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-
+import type { Task } from "../../src/types/index";
 export default function TaskListScreen() {
   const {
     tasks,
@@ -22,7 +22,7 @@ export default function TaskListScreen() {
     searchQuery,
     setSearchQuery,
     loadTasks,
-    loading,
+    isLoading,
   } = useTaskStore();
 
   const [sortBy, setSortBy] = useState<"date" | "priority">("date");
@@ -34,8 +34,8 @@ export default function TaskListScreen() {
   const filteredTasks = tasks.filter((task) => {
     const matchesFilter =
       filter === "all" ||
-      (filter === "pending" && !task.completed) ||
-      (filter === "completed" && task.completed);
+      (filter === "pending" && task.status === "pending") || // ✅ Use task.status
+      (filter === "completed" && task.status === "completed");
 
     const matchesSearch = task.title
       .toLowerCase()
@@ -46,16 +46,39 @@ export default function TaskListScreen() {
 
   const sortedTasks = [...filteredTasks].sort((a, b) => {
     if (sortBy === "priority") {
-      const priorityOrder = { high: 0, medium: 1, low: 2 };
-      return priorityOrder[a.priority] - priorityOrder[b.priority];
+      const priorityOrder = { high: 0, medium: 1, low: 2, undefined: 3 };
+      return (
+        (priorityOrder[a.priority ?? "undefined"] ?? 3) -
+        (priorityOrder[b.priority ?? "undefined"] ?? 3)
+      );
     }
     return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
   });
 
+  const handleTaskPress = useCallback((task: Task) => {
+    console.log("Task pressed:", task.title);
+    // TODO: Navigate to edit screen
+  }, []);
+
+  const handleImagePress = useCallback((task: Task) => {
+    console.log("Image pressed:", task.imageUri);
+    // TODO: Show image in full screen
+  }, []);
+
   const renderItem = useCallback(
-    ({ item }: any) => <TaskItem task={item} />,
-    []
+    ({ item }: { item: Task }) => (
+      <TaskItem
+        task={item}
+        onPress={() => handleTaskPress(item)}
+        onImagePress={item.imageUri ? () => handleImagePress(item) : undefined}
+      />
+    ),
+    [handleTaskPress, handleImagePress]
   );
+  // const renderItem = useCallback(
+  //   ({ item }: any) => <TaskItem task={item} />,
+  //   []
+  // );
 
   const renderHeader = () => (
     <View className="mb-6">
@@ -123,7 +146,7 @@ export default function TaskListScreen() {
       className="flex-1 bg-white"
     >
       <View className="flex-1">
-        {loading && (
+        {isLoading && (
           <View className="absolute inset-0 justify-center items-center bg-black/10 z-50">
             <ActivityIndicator size="large" color="#2563eb" />
           </View>

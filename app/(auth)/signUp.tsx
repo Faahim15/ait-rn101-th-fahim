@@ -13,6 +13,7 @@ import {
 } from "react-native";
 
 export default function SignupScreen() {
+  const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -24,7 +25,7 @@ export default function SignupScreen() {
   const handleSignup = async () => {
     setError("");
 
-    if (!email || !password || !confirmPassword) {
+    if (!name || !email || !password || !confirmPassword) {
       setError("All fields are required");
       return;
     }
@@ -36,7 +37,7 @@ export default function SignupScreen() {
 
     setLoading(true);
     try {
-      await signup(email, password);
+      await signup(email, password, name);
       router.replace("/");
     } catch (err: any) {
       setError(err.message || "Signup failed");
@@ -72,6 +73,22 @@ export default function SignupScreen() {
               <Text className="text-red-700 font-medium">{error}</Text>
             </View>
           )}
+
+          {/* Name Input - ✅ Add this */}
+          <View className="mb-4">
+            <Text className="text-sm font-semibold text-gray-700 mb-2">
+              Full Name
+            </Text>
+            <TextInput
+              placeholder="Enter your full name"
+              value={name}
+              onChangeText={setName}
+              editable={!loading}
+              autoCapitalize="words"
+              className="border border-gray-300 rounded-lg px-4 py-3 text-gray-900 bg-white"
+              placeholderTextColor="#999"
+            />
+          </View>
 
           {/* Email Input */}
           <View className="mb-4">

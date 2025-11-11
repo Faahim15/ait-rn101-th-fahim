@@ -3,6 +3,7 @@ export interface Task {
   title: string;
   description?: string;
   dueDate?: string;
+  priority?: "low" | "medium" | "high";
   status: "pending" | "completed";
   tags?: string[];
   imageUri?: string;
@@ -29,7 +30,7 @@ export interface SyncQueue {
   id: string;
   action: "create" | "update" | "delete";
   taskId: string;
-  taskData?: Partial<Task>;
+  taskData?: Task | Partial<Task>; // ✅ Allow both
   timestamp: number;
   retries: number;
 }
