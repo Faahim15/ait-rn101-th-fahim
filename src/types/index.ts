@@ -1,17 +1,16 @@
-export interface Task {
+export type Task = {
   id: string;
   title: string;
-  description?: string;
+  description: string;
+  priority: "low" | "medium" | "high";
   dueDate?: string;
-  priority?: "low" | "medium" | "high";
   status: "pending" | "completed";
+  imageUri?: string | null;
   tags?: string[];
-  imageUri?: string;
-  imageBase64?: string;
   createdAt: string;
   updatedAt: string;
-  syncStatus: "synced" | "pending" | "failed";
-}
+  syncStatus?: "synced" | "pending";
+};
 
 export interface AuthState {
   user: User | null;

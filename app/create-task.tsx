@@ -1,9 +1,11 @@
 import { useTaskStore } from "@/src/store/taskStore";
 import { Ionicons } from "@expo/vector-icons";
-import DateTimePicker from "@react-native-community/datetimepicker"; // ✅ added
+import DateTimePicker from "@react-native-community/datetimepicker";
+import * as ImagePicker from "expo-image-picker";
 import { router } from "expo-router";
 import { useState } from "react";
 import {
+  Image,
   KeyboardAvoidingView,
   Platform,
   ScrollView,
@@ -20,10 +22,12 @@ export default function CreateTaskScreen() {
   const [description, setDescription] = useState("");
   const [priority, setPriority] = useState<Priority>("medium");
   const [dueDate, setDueDate] = useState("");
-  const [showPicker, setShowPicker] = useState(false); // ✅ added
+  const [showPicker, setShowPicker] = useState(false);
+  const [imageUri, setImageUri] = useState<string | null>(null); // ✅ fixed variable name
 
   const { addTask } = useTaskStore();
 
+  // ✅ Create task
   const handleCreate = async () => {
     if (!title.trim()) {
       alert("Please enter a task title");
@@ -37,6 +41,7 @@ export default function CreateTaskScreen() {
         priority,
         dueDate,
         status: "pending",
+        imageUri, // ✅ correctly named
       });
 
       alert("Task created successfully!");
@@ -46,11 +51,31 @@ export default function CreateTaskScreen() {
     }
   };
 
+  // ✅ Date picker handler
   const handleDateChange = (event: any, selectedDate?: Date) => {
     setShowPicker(false);
     if (selectedDate) {
       const formatted = selectedDate.toISOString().split("T")[0];
       setDueDate(formatted);
+    }
+  };
+
+  // ✅ Image picker handler
+  const pickImage = async () => {
+    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (status !== "granted") {
+      alert("Permission to access gallery is required!");
+      return;
+    }
+
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: true,
+      quality: 0.8,
+    });
+
+    if (!result.canceled && result.assets.length > 0) {
+      setImageUri(result.assets[0].uri);
     }
   };
 
@@ -130,8 +155,8 @@ export default function CreateTaskScreen() {
           </View>
         </View>
 
-        {/* ✅ Due Date Input with Calendar */}
-        <View className="mb-8">
+        {/* ✅ Due Date Input */}
+        <View className="mb-6">
           <Text className="text-sm font-semibold text-gray-700 mb-2">
             Due Date (Optional)
           </Text>
@@ -154,6 +179,33 @@ export default function CreateTaskScreen() {
               display={Platform.OS === "ios" ? "inline" : "default"}
               onChange={handleDateChange}
             />
+          )}
+        </View>
+
+        {/* ✅ Image Picker Section */}
+        <View className="mb-8">
+          <Text className="text-sm font-semibold text-gray-700 mb-2">
+            Attach Image (Optional)
+          </Text>
+          <TouchableOpacity
+            onPress={pickImage}
+            activeOpacity={0.8}
+            className="flex-row items-center border border-gray-300 rounded-lg px-4 py-3 bg-gray-50"
+          >
+            <Ionicons name="image-outline" size={20} color="#16a34a" />
+            <Text className="ml-2 text-gray-900">
+              {imageUri ? "Change Image" : "Select from Gallery"}
+            </Text>
+          </TouchableOpacity>
+
+          {imageUri && (
+            <View className="mt-3 items-center">
+              <Image
+                source={{ uri: imageUri }}
+                className="w-40 h-40 rounded-lg border border-gray-300"
+                resizeMode="cover"
+              />
+            </View>
           )}
         </View>
 
