@@ -14,6 +14,7 @@ import {
   View,
 } from "react-native";
 import type { Task } from "../../src/types/index";
+
 export default function TaskListScreen() {
   const {
     tasks,
@@ -24,7 +25,6 @@ export default function TaskListScreen() {
     loadTasks,
     isLoading,
   } = useTaskStore();
-
   const [sortBy, setSortBy] = useState<"date" | "priority">("date");
 
   useEffect(() => {
@@ -34,7 +34,7 @@ export default function TaskListScreen() {
   const filteredTasks = tasks.filter((task) => {
     const matchesFilter =
       filter === "all" ||
-      (filter === "pending" && task.status === "pending") || // ✅ Use task.status
+      (filter === "pending" && task.status === "pending") ||
       (filter === "completed" && task.status === "completed");
 
     const matchesSearch = task.title
@@ -57,12 +57,7 @@ export default function TaskListScreen() {
 
   const handleTaskPress = useCallback((task: Task) => {
     console.log("Task pressed:", task.title);
-    // TODO: Navigate to edit screen
-  }, []);
-
-  const handleImagePress = useCallback((task: Task) => {
-    console.log("Image pressed:", task.imageUri);
-    // TODO: Show image in full screen
+    // TODO: Navigate to edit screen if needed
   }, []);
 
   const renderItem = useCallback(
@@ -70,10 +65,10 @@ export default function TaskListScreen() {
       <TaskItem
         task={item}
         onPress={() => handleTaskPress(item)}
-        onImagePress={item.imageUri ? () => handleImagePress(item) : undefined}
+        onImagePress={undefined} // ✅ No view image functionality
       />
     ),
-    [handleTaskPress, handleImagePress]
+    [handleTaskPress]
   );
 
   const renderHeader = () => (
@@ -86,7 +81,7 @@ export default function TaskListScreen() {
           placeholderTextColor="#999"
           value={searchQuery}
           onChangeText={setSearchQuery}
-          className="flex-1 ml-2 py-3   text-gray-900"
+          className="flex-1 ml-2 py-3 text-gray-900"
         />
       </View>
 
@@ -100,7 +95,9 @@ export default function TaskListScreen() {
               className={`px-4 py-2 rounded-lg ${filter === f ? "bg-blue-600" : "bg-gray-200"}`}
             >
               <Text
-                className={`font-medium capitalize ${filter === f ? "text-white" : "text-gray-700"}`}
+                className={`font-medium capitalize ${
+                  filter === f ? "text-white" : "text-gray-700"
+                }`}
               >
                 {f}
               </Text>

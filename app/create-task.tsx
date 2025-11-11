@@ -23,11 +23,10 @@ export default function CreateTaskScreen() {
   const [priority, setPriority] = useState<Priority>("medium");
   const [dueDate, setDueDate] = useState("");
   const [showPicker, setShowPicker] = useState(false);
-  const [imageUri, setImageUri] = useState<string | null>(null); // ✅ fixed variable name
+  const [image, setImage] = useState<string | null>(null);
 
   const { addTask } = useTaskStore();
 
-  // ✅ Create task
   const handleCreate = async () => {
     if (!title.trim()) {
       alert("Please enter a task title");
@@ -35,13 +34,13 @@ export default function CreateTaskScreen() {
     }
 
     try {
-      addTask({
-        title: title.trim(),
-        description: description.trim(),
+      await addTask({
+        title,
+        description,
         priority,
         dueDate,
         status: "pending",
-        imageUri, // ✅ correctly named
+        imageUri: image, // match Task type property
       });
 
       alert("Task created successfully!");
@@ -51,7 +50,6 @@ export default function CreateTaskScreen() {
     }
   };
 
-  // ✅ Date picker handler
   const handleDateChange = (event: any, selectedDate?: Date) => {
     setShowPicker(false);
     if (selectedDate) {
@@ -60,7 +58,6 @@ export default function CreateTaskScreen() {
     }
   };
 
-  // ✅ Image picker handler
   const pickImage = async () => {
     const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
     if (status !== "granted") {
@@ -75,7 +72,7 @@ export default function CreateTaskScreen() {
     });
 
     if (!result.canceled && result.assets.length > 0) {
-      setImageUri(result.assets[0].uri);
+      setImage(result.assets[0].uri);
     }
   };
 
@@ -144,9 +141,7 @@ export default function CreateTaskScreen() {
                 }`}
               >
                 <Text
-                  className={`font-semibold capitalize ${
-                    priority === p ? "text-blue-600" : "text-gray-700"
-                  }`}
+                  className={`font-semibold capitalize ${priority === p ? "text-blue-600" : "text-gray-700"}`}
                 >
                   {p}
                 </Text>
@@ -155,7 +150,7 @@ export default function CreateTaskScreen() {
           </View>
         </View>
 
-        {/* ✅ Due Date Input */}
+        {/* Due Date */}
         <View className="mb-6">
           <Text className="text-sm font-semibold text-gray-700 mb-2">
             Due Date (Optional)
@@ -182,7 +177,7 @@ export default function CreateTaskScreen() {
           )}
         </View>
 
-        {/* ✅ Image Picker Section */}
+        {/* Image Picker */}
         <View className="mb-8">
           <Text className="text-sm font-semibold text-gray-700 mb-2">
             Attach Image (Optional)
@@ -194,14 +189,14 @@ export default function CreateTaskScreen() {
           >
             <Ionicons name="image-outline" size={20} color="#16a34a" />
             <Text className="ml-2 text-gray-900">
-              {imageUri ? "Change Image" : "Select from Gallery"}
+              {image ? "Change Image" : "Select from Gallery"}
             </Text>
           </TouchableOpacity>
 
-          {imageUri && (
+          {image && (
             <View className="mt-3 items-center">
               <Image
-                source={{ uri: imageUri }}
+                source={{ uri: image }}
                 className="w-40 h-40 rounded-lg border border-gray-300"
                 resizeMode="cover"
               />

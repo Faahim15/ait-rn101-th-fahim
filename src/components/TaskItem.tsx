@@ -1,6 +1,13 @@
 import { Ionicons } from "@expo/vector-icons";
 import type React from "react";
-import { Alert, Animated, Text, TouchableOpacity, View } from "react-native";
+import {
+  Alert,
+  Animated,
+  Image,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
 import { useTaskStore } from "../store/taskStore";
 import type { Task } from "../types";
 import { cn } from "../utils/cn";
@@ -68,18 +75,6 @@ export const TaskItem: React.FC<TaskItemProps> = ({
               {task.description}
             </Text>
           )}
-          {task.tags && task.tags.length > 0 && (
-            <View className="flex-row gap-1 mt-2">
-              {task.tags.map((tag) => (
-                <Text
-                  key={tag}
-                  className="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded"
-                >
-                  {tag}
-                </Text>
-              ))}
-            </View>
-          )}
           {task.dueDate && (
             <Text className="text-xs text-gray-400 mt-1">
               Due: {task.dueDate}
@@ -89,16 +84,17 @@ export const TaskItem: React.FC<TaskItemProps> = ({
 
         <View className="flex-row gap-2 ml-4">
           {task.imageUri && (
-            <TouchableOpacity onPress={onImagePress} className="p-2">
-              <Ionicons name="image" size={20} color="#3b82f6" />
+            <TouchableOpacity onPress={onImagePress}>
+              <Image
+                source={{ uri: task.imageUri }}
+                style={{ width: 40, height: 40, borderRadius: 6 }}
+                resizeMode="cover"
+              />
             </TouchableOpacity>
           )}
           <TouchableOpacity
             onPress={handleToggle}
-            className={cn(
-              "p-2",
-              task.status === "completed" ? "bg-green-100" : "bg-blue-100"
-            )}
+            className={`p-2 ${task.status === "completed" ? "bg-green-100" : "bg-blue-100"}`}
           >
             <Ionicons
               name={
