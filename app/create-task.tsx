@@ -34,6 +34,7 @@ export default function CreateTaskScreen() {
         description: description.trim(),
         priority,
         dueDate,
+        status: "pending",
       });
 
       alert("Task created successfully!");

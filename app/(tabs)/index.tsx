@@ -1,5 +1,5 @@
-"use client";
-
+import { TaskItem } from "@/src/components/TaskItem";
+import { useTaskStore } from "@/src/store/taskStore";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import { useCallback, useEffect, useState } from "react";

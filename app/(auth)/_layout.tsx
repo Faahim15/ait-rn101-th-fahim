@@ -1,18 +1,15 @@
-import { Stack } from "expo-router";
-import { StatusBar } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
+import { Stack } from "expo-router"
 
-export default function Layout() {
+export default function AuthLayout() {
   return (
-    <>
-      <StatusBar
-        translucent
-        backgroundColor="transparent"
-        barStyle="dark-content"
-      />
-      <SafeAreaView style={{ flex: 1, backgroundColor: "white" }}>
-        <Stack screenOptions={{ headerShown: false }} />
-      </SafeAreaView>
-    </>
-  );
+    <Stack
+      screenOptions={{
+        headerShown: false,
+        // animationEnabled: true,
+      }}
+    >
+      <Stack.Screen name="login" />
+      <Stack.Screen name="signup" />
+    </Stack>
+  )
 }
