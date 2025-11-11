@@ -1,5 +1,6 @@
 import { useTaskStore } from "@/src/store/taskStore";
 import { Ionicons } from "@expo/vector-icons";
+import DateTimePicker from "@react-native-community/datetimepicker"; // ✅ added
 import { router } from "expo-router";
 import { useState } from "react";
 import {
@@ -19,6 +20,7 @@ export default function CreateTaskScreen() {
   const [description, setDescription] = useState("");
   const [priority, setPriority] = useState<Priority>("medium");
   const [dueDate, setDueDate] = useState("");
+  const [showPicker, setShowPicker] = useState(false); // ✅ added
 
   const { addTask } = useTaskStore();
 
@@ -41,6 +43,14 @@ export default function CreateTaskScreen() {
       router.back();
     } catch (error) {
       alert("Failed to create task");
+    }
+  };
+
+  const handleDateChange = (event: any, selectedDate?: Date) => {
+    setShowPicker(false);
+    if (selectedDate) {
+      const formatted = selectedDate.toISOString().split("T")[0];
+      setDueDate(formatted);
     }
   };
 
@@ -109,7 +119,9 @@ export default function CreateTaskScreen() {
                 }`}
               >
                 <Text
-                  className={`font-semibold capitalize ${priority === p ? "text-blue-600" : "text-gray-700"}`}
+                  className={`font-semibold capitalize ${
+                    priority === p ? "text-blue-600" : "text-gray-700"
+                  }`}
                 >
                   {p}
                 </Text>
@@ -118,21 +130,31 @@ export default function CreateTaskScreen() {
           </View>
         </View>
 
-        {/* Due Date Input */}
+        {/* ✅ Due Date Input with Calendar */}
         <View className="mb-8">
           <Text className="text-sm font-semibold text-gray-700 mb-2">
             Due Date (Optional)
           </Text>
-          <View className="flex-row items-center border border-gray-300 rounded-lg px-4 py-3">
-            <Ionicons name="calendar" size={20} color="#2563eb" />
-            <TextInput
-              placeholder="YYYY-MM-DD"
-              value={dueDate}
-              onChangeText={setDueDate}
-              className="flex-1 ml-2 text-gray-900"
-              placeholderTextColor="#999"
+          <TouchableOpacity
+            onPress={() => setShowPicker(true)}
+            activeOpacity={0.8}
+          >
+            <View className="flex-row items-center border border-gray-300 rounded-lg px-4 py-3">
+              <Ionicons name="calendar" size={20} color="#2563eb" />
+              <Text className="ml-2 text-gray-900">
+                {dueDate ? dueDate : "Select a due date"}
+              </Text>
+            </View>
+          </TouchableOpacity>
+
+          {showPicker && (
+            <DateTimePicker
+              value={dueDate ? new Date(dueDate) : new Date()}
+              mode="date"
+              display={Platform.OS === "ios" ? "inline" : "default"}
+              onChange={handleDateChange}
             />
-          </View>
+          )}
         </View>
 
         {/* Create Button */}

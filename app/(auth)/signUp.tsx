@@ -1,4 +1,5 @@
 import { useAuthStore } from "@/src/store/authStore";
+import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import { useState } from "react";
 import {
@@ -19,7 +20,8 @@ export default function SignupScreen() {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const signup = useAuthStore((state) => state.signup);
 
   const handleSignup = async () => {
@@ -112,15 +114,25 @@ export default function SignupScreen() {
             <Text className="text-sm font-semibold text-gray-700 mb-2">
               Password
             </Text>
-            <TextInput
-              placeholder="Create a password"
-              value={password}
-              onChangeText={setPassword}
-              editable={!loading}
-              secureTextEntry
-              className="border border-gray-300 rounded-lg px-4 py-3 text-gray-900 bg-white"
-              placeholderTextColor="#999"
-            />
+            <View className="border border-gray-300 rounded-lg px-4 flex-row items-center bg-white">
+              <TextInput
+                placeholder="Create a password"
+                value={password}
+                onChangeText={setPassword}
+                editable={!loading}
+                secureTextEntry={!showPassword}
+                className="flex-1 py-3 text-gray-900"
+                placeholderTextColor="#999"
+              />
+              <TouchableOpacity onPress={() => setShowPassword(!showPassword)}>
+                <Ionicons
+                  name={showPassword ? "eye-outline" : "eye-off-outline"}
+                  size={18}
+                  color="#9CA3AF"
+                  // style={{ paddingTop: 15 }}
+                />
+              </TouchableOpacity>
+            </View>
           </View>
 
           {/* Confirm Password Input */}
@@ -128,15 +140,26 @@ export default function SignupScreen() {
             <Text className="text-sm font-semibold text-gray-700 mb-2">
               Confirm Password
             </Text>
-            <TextInput
-              placeholder="Confirm your password"
-              value={confirmPassword}
-              onChangeText={setConfirmPassword}
-              editable={!loading}
-              secureTextEntry
-              className="border border-gray-300 rounded-lg px-4 py-3 text-gray-900 bg-white"
-              placeholderTextColor="#999"
-            />
+            <View className="border border-gray-300 rounded-lg px-4 flex-row items-center bg-white">
+              <TextInput
+                placeholder="Confirm your password"
+                value={confirmPassword}
+                onChangeText={setConfirmPassword}
+                editable={!loading}
+                secureTextEntry={!showConfirmPassword}
+                className="flex-1 py-3 text-gray-900"
+                placeholderTextColor="#999"
+              />
+              <TouchableOpacity
+                onPress={() => setShowConfirmPassword(!showConfirmPassword)}
+              >
+                <Ionicons
+                  name={showConfirmPassword ? "eye-outline" : "eye-off-outline"}
+                  size={18}
+                  color="#9CA3AF"
+                />
+              </TouchableOpacity>
+            </View>
           </View>
 
           {/* Signup Button */}

@@ -75,22 +75,18 @@ export default function TaskListScreen() {
     ),
     [handleTaskPress, handleImagePress]
   );
-  // const renderItem = useCallback(
-  //   ({ item }: any) => <TaskItem task={item} />,
-  //   []
-  // );
 
   const renderHeader = () => (
     <View className="mb-6">
       {/* Search Bar */}
-      <View className="mb-4 flex-row items-center bg-gray-100 rounded-lg px-[5%] mx-[3%]">
+      <View className="mb-4 mt-2 flex-row items-center bg-gray-100 rounded-lg px-[5%] mx-[3%]">
         <Ionicons name="search" size={20} color="#999" />
         <TextInput
           placeholder="Search tasks..."
           placeholderTextColor="#999"
           value={searchQuery}
           onChangeText={setSearchQuery}
-          className="flex-1 ml-2 py-3 text-gray-900"
+          className="flex-1 ml-2 py-3   text-gray-900"
         />
       </View>
 

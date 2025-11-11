@@ -1,15 +1,16 @@
 {
   "expo": {
-    "name": "ait-rn101-th-fahim",
-    "slug": "ait-rn101-th-fahim",
+    "name": "TaskFlow",
+    "slug": "taskflow",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
-    "scheme": "aitrn101thfahim",
+    "scheme": "taskflow",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.taskflow.app"
     },
     "android": {
       "adaptiveIcon": {
@@ -20,7 +21,7 @@
       },
       "edgeToEdgeEnabled": true,
       "predictiveBackGestureEnabled": false,
-      "package": "com.fahim15.aitrn101thfahim"
+      "package": "com.taskflow.app"
     },
     "web": {
       "output": "static",
